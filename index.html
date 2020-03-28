@@ -1,0 +1,213 @@
+<head>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/16.7.0/Tween.js"></script>
+</head>
+</head>
+<body>
+  <button id="controls">Controls</button>
+  <button id="download">Download</button>
+  <div class="burak">
+      <img src="img.png" />
+      Created by <a target="_blank" href="http://burakaslan.me/">Burak Aslan</a>
+  </div>
+  <div class="controls">
+    <div>
+      <label>
+        Red
+      </label>
+      <input
+        data-val="u_red"
+        type="range"
+        value="1"
+        min="0"
+        step=".05"
+        max="1"
+      />
+      <p id="u_red">1</p>
+    </div>
+    <div>
+      <label>
+        Green
+      </label>
+      <input
+        data-val="u_green"
+        type="range"
+        value="0"
+        min="0"
+        step=".05"
+        max="1"
+      />
+      <p id="u_green">0</p>
+    </div>
+    <div>
+      <label>
+        Blue
+      </label>
+      <input
+        data-val="u_blue"
+        type="range"
+        value=".5"
+        min="0"
+        step=".05"
+        max="1"
+      />
+      <p id="u_blue">.5</p>
+    </div>
+    <div>
+      <label>
+        Freq
+      </label>
+      <input
+        data-val="u_frequency"
+        type="range"
+        value="1"
+        min="0"
+        step=".1"
+        max="10"
+      />
+      <p id="u_frequency">1</p>
+    </div>
+
+    <div>
+      <label>
+        Amp
+      </label>
+      <input
+        data-val="u_amplitude"
+        type="range"
+        value="0.5"
+        min="0"
+        step=".1"
+        max="1"
+      />
+      <p id="u_amplitude">.5</p>
+    </div>
+
+    <div>
+      <label>
+        Speed
+      </label>
+      <input
+        data-val="u_speed"
+        type="range"
+        value=".5"
+        min="0"
+        step=".05"
+        max="1"
+      />
+      <p id="u_speed">.1</p>
+    </div>
+    <div>
+      <label>
+        Scale
+      </label>
+      <input
+        data-val="u_scale"
+        type="range"
+        value="0.0025"
+        min="0"
+        step=".0001"
+        max="0.01"
+      />
+      <p id="u_scale">.0025</p>
+    </div>
+  </div>
+  <div id="container"></div>
+  <script src="js/three.min.js"></script>
+  <script id="vertexShader" type="x-shader/x-vertex">
+    void main() {
+        gl_Position = vec4( position, 1.0 );
+    }
+  </script>
+  <script id="fragmentShader" type="x-shader/x-fragment">
+    #ifdef GL_ES
+    precision mediump float;
+    #endif
+
+    uniform vec2 u_resolution;
+    uniform float u_time;
+    uniform float u_red;
+    uniform float u_blue;
+    uniform float u_green;
+    uniform float u_speed;
+    uniform float u_amplitude;
+    uniform float u_frequency;
+    uniform float u_scale;
+
+          float hash(vec2 p) { return fract(1e4 * sin(17.0 * p.x + p.y * 0.1) * (0.1 + abs(sin(p.y * 13.0 + p.x)))); }
+    float noise(vec2 x) {
+        vec2 i = floor(x);
+        vec2 f = fract(x);
+        float a = hash(i);
+        float b = hash(i + vec2(1.0, 0.0));
+        float c = hash(i + vec2(0.0, 1.0));
+        float d = hash(i + vec2(1.0, 1.0));
+        vec2 u = f * f * (3.0 - 2.0 * f);
+        return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+    }
+
+    #define octaves 14
+    float fbm (in vec2 p) {
+
+        float value = 0.0;
+        float freq = u_frequency;
+        float amp = u_amplitude;
+
+        for (int i = 0; i < 10; i++) {
+            value += amp * (noise((p - vec2(1.0)) * freq));
+            freq *= 1.9;
+            amp *= 0.6;
+        }
+        return value;
+    }
+
+    float pattern(in vec2 p) {
+        vec2 offset = vec2(-0.5);
+
+        vec2 aPos = vec2(sin(u_time * 0.005), sin(u_time * 0.01)) * 6.;
+        vec2 aScale = vec2(3.0);
+        float a = fbm(p * aScale + aPos);
+
+        vec2 bPos = vec2(sin(u_time * 0.01), sin(u_time * 0.01)) * 1.;
+        vec2 bScale = vec2(0.6);
+        float b = fbm((p + a) * bScale + bPos);
+
+        vec2 cPos = vec2(-0.6, -0.5) + vec2(sin(-u_time * 0.001), sin(u_time * 0.01)) * 2.;
+        vec2 cScale = vec2(2.6);
+        float c = fbm((p + b) * cScale + cPos);
+        return c;
+    }
+
+    vec3 palette(in float t) {
+        vec3 a = vec3(0.5, 0.5, 0.5);
+        vec3 b = vec3(0.45, 0.25, 0.14);
+        vec3 c = vec3(1.0 ,1.0, 1.0);
+        vec3 d = vec3(0.0, 0.1, 0.2);
+        return a + b * cos(6.28318 * (c * t + d));
+    }
+
+
+    void main()
+    {
+        float speed = u_speed;
+        float scale = u_scale;
+        vec2 p = gl_FragCoord.xy * scale;
+        p.x += pattern(vec2(p.x + ((u_time * speed * .005) ), p.y));
+
+        for (int i=1; i<10; i++){
+            p.x += 0.3 / float(i) * sin(float(i)* 3. * p.y + u_time * speed);
+            p.y += 0.3 / float(i) * cos(float(i) * 3. * p.x + u_time * speed);
+        }
+
+
+        float r = sin(p.x+p.y) * u_red + u_red;
+        float g = cos(p.x+p.y) * u_green + u_green;
+        float b = (sin(p.x + p.y) + cos(p.x + p.y)) * u_blue + u_blue;
+        vec3 color = vec3(r, g, b);
+        gl_FragColor = vec4(color, 1);
+    }
+  </script>
+  <script src="main.js"></script>
+
+</body>

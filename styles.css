@@ -1,0 +1,184 @@
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: none;
+}
+
+#container {
+  height: 100%;
+  width: 100%;
+}
+
+.controls {
+  position: fixed;
+  top: 0;
+  margin: 24px;
+  right: 0;
+  align-self: flex-start;
+  justify-self: flex-start;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(40px);
+  border-radius: 24px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  font-family: sans-serif;
+  align-items: flex-start;
+  padding: 24px 32px;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  display: block;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.25));
+}
+
+.controls div {
+  flex: 1;
+  width: 100%;
+}
+
+a:hover,
+a:visited,
+a {
+  text-decoration: none;
+  color: black;
+}
+
+button {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  font-weight: bold;
+  height: 40px;
+  font-size: 16px;
+  margin-bottom: 24px;
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.25), 0 12px 32px 0 rgba(0, 0, 0, 0.4);
+  line-height: 40px;
+  font-family: sans-serif;
+  padding: 0 24px;
+  bottom: 0;
+  z-index: 10;
+  transition: all 200ms ease-out;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+button:first-child {
+  display: none;
+}
+
+button:hover {
+  background: #fefefe;
+}
+
+#download:hover {
+  transform: translateY(-2px) translateX(-50%);
+}
+
+.burak {
+  font-family: sans-serif;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  left: 0;
+  font-size: 14px;
+  bottom: 0;
+  margin: 24px;
+  color: rgba(255, 255, 255, 0.75);
+  z-index: 5;
+}
+
+.burak a {
+  color: white;
+  font-weight: bold;
+  margin: 0;
+  padding: 0;
+  margin-left: 4px;
+}
+
+.burak img {
+  height: 28px;
+  width: 28px;
+  margin-right: 8px;
+  border-radius: 50%;
+}
+
+a:hover {
+}
+
+input {
+  flex: 1;
+  margin: 0 24px;
+}
+
+label {
+  color: white;
+}
+
+.controls div {
+  display: flex;
+  align-items: center;
+}
+
+@media only screen and (max-width: 600px) {
+  button:first-child {
+    display: block;
+  }
+  .burak {
+    top: 0;
+    bottom: auto;
+  }
+  .controls {
+    top: auto;
+    bottom: 100%;
+  }
+
+  button:first-child {
+    left: 0;
+    transform: none;
+  }
+
+  button {
+    margin: 24px;
+    height: 32px;
+    line-height: 32px;
+    font-size: 14px;
+    padding: 0 12px;
+    z-index: 10;
+  }
+
+  .controls.show {
+    top: 0;
+    bottom: auto;
+    left: 0;
+    right: 0;
+    width: calc(100% - 114px);
+    opacity: 1;
+  }
+
+  .controls {
+    opacity: 0;
+    transition: opacity 200ms ease-out;
+  }
+
+  .controls div {
+    width: 100%;
+  }
+
+  button:not(:first-child) {
+    right: 0;
+    left: auto;
+    transform: none;
+  }
+}
