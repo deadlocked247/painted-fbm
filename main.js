@@ -1,4 +1,13 @@
+var capturer = new CCapture({
+  framerate: 60,
+  format: "webm",
+  verbose: true
+});
+
 function download(canvas, filename) {
+  if (!canvas) {
+    return;
+  }
   /// create an "off-screen" anchor tag
   var lnk = document.createElement("a"),
     e;
@@ -136,9 +145,27 @@ function animate(time) {
   requestAnimationFrame(animate);
   render();
   TWEEN.update(time);
+  if (document.querySelector("canvas"))
+    capturer.capture(document.querySelector("canvas"));
 }
 
 function render() {
   uniforms.u_time.value += 0.05;
   renderer.render(scene, camera);
 }
+
+let rec = false;
+function key(e) {
+  if (e.keyCode === 32) {
+    if (rec) {
+      rec = false;
+      capturer.stop();
+      capturer.save();
+    } else {
+      rec = true;
+      capturer.start();
+    }
+  }
+}
+
+document.addEventListener("keydown", key);
